@@ -170,7 +170,7 @@ export const AudioDemo = forwardRef<AudioDemoHandle, AudioDemoProps>(
 						<motion.button
 							whileHover={{ scale: 1.1 }}
 							whileTap={{ scale: 0.9 }}
-							className="p-3 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+							className="p-3 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors text-black"
 							onClick={() => skipTime(-15)}
 							aria-label="Skip back 15 seconds"
 						>
@@ -192,7 +192,7 @@ export const AudioDemo = forwardRef<AudioDemoHandle, AudioDemoProps>(
 						<motion.button
 							whileHover={{ scale: 1.1 }}
 							whileTap={{ scale: 0.9 }}
-							className="p-3 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+							className="p-3 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors text-black"
 							onClick={() => skipTime(15)}
 							aria-label="Skip forward 15 seconds"
 						>
