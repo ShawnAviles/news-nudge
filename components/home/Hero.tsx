@@ -1,11 +1,34 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Volume2, Play, Headphones, Clock } from "lucide-react";
+import { Play, Headphones, Clock, Pause } from "lucide-react";
+import { AudioDemo, AudioDemoHandle } from "./AudioDemo";
 
 export function Hero() {
+	// Create a ref to access the AudioDemo methods
+	const audioPlayerRef = useRef<AudioDemoHandle>(null);
+	const [isPlaying, setIsPlaying] = useState(false);
+
+	useEffect(() => {
+		// Set up an interval to check the player status
+		const interval = setInterval(() => {
+			if (audioPlayerRef.current) {
+				const status = audioPlayerRef.current.status();
+				setIsPlaying(status === "Playing");
+			}
+		}, 100);
+
+		return () => clearInterval(interval);
+	}, []);
+
 	const scrollToWaitlist = () => {
 		document.getElementById("waitlist")?.scrollIntoView({ behavior: "smooth" });
+	};
+
+	const handlePlayDemo = () => {
+		// Toggle play/pause when the demo button is clicked
+		audioPlayerRef.current?.toggle();
 	};
 
 	return (
@@ -71,9 +94,14 @@ export function Hero() {
 							<motion.button
 								whileHover={{ scale: 1.05 }}
 								whileTap={{ scale: 0.95 }}
+								onClick={handlePlayDemo}
 								className="btn btn-outline btn-lg px-8 py-4 text-lg font-semibold"
 							>
-								<Play className="w-5 h-5 mr-2" />
+								{isPlaying ? (
+									<Pause className="w-5 h-5 mr-2" />
+								) : (
+									<Play className="w-5 h-5 mr-2" />
+								)}
 								Listen to Demo
 							</motion.button>
 						</motion.div>
@@ -107,79 +135,11 @@ export function Hero() {
 						className="relative"
 					>
 						<div className="relative">
-							<motion.div
-								animate={{ y: [0, -10, 0] }}
-								transition={{
-									duration: 3,
-									repeat: Infinity,
-									ease: "easeInOut",
-								}}
-								className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-200"
-							>
-								<div className="flex items-center justify-between mb-6">
-									<div className="flex items-center space-x-3">
-										<div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center">
-											<Volume2 className="w-6 h-6 text-white" />
-										</div>
-										<div>
-											<h3 className="font-semibold text-gray-900">
-												Morning Briefing
-											</h3>
-											<p className="text-sm text-gray-500">
-												Tech Newsletter Digest
-											</p>
-										</div>
-									</div>
-									<div className="text-sm text-gray-500">5:32</div>
-								</div>
-
-								<div className="space-y-4">
-									<div className="w-full bg-gray-200 rounded-full h-2">
-										<motion.div
-											initial={{ width: "0%" }}
-											animate={{ width: "35%" }}
-											transition={{ duration: 2, delay: 1 }}
-											className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full"
-										></motion.div>
-									</div>
-
-									<div className="flex items-center justify-center space-x-6">
-										<motion.button
-											whileHover={{ scale: 1.1 }}
-											whileTap={{ scale: 0.9 }}
-											className="p-3 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
-										>
-											<svg
-												className="w-5 h-5"
-												fill="currentColor"
-												viewBox="0 0 20 20"
-											>
-												<path d="M4.555 5.168A1 1 0 003 6v8a1 1 0 001.555.832L12 10.202 4.555 5.168z" />
-											</svg>
-										</motion.button>
-										<motion.button
-											whileHover={{ scale: 1.1 }}
-											whileTap={{ scale: 0.9 }}
-											className="p-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors shadow-lg"
-										>
-											<Play className="w-6 h-6" />
-										</motion.button>
-										<motion.button
-											whileHover={{ scale: 1.1 }}
-											whileTap={{ scale: 0.9 }}
-											className="p-3 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
-										>
-											<svg
-												className="w-5 h-5"
-												fill="currentColor"
-												viewBox="0 0 20 20"
-											>
-												<path d="M15.445 5.168A1 1 0 0117 6v8a1 1 0 01-1.555.832L8 10.202l7.445-5.034z" />
-											</svg>
-										</motion.button>
-									</div>
-								</div>
-							</motion.div>
+							<AudioDemo
+								ref={audioPlayerRef}
+								title="Morning Briefing"
+								subtitle="Tech Newsletter Digest"
+							/>
 
 							{/* Floating Elements */}
 							<motion.div
