@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Star, Quote } from "lucide-react";
+import Image from "next/image";
 
 const testimonials = [
 	{
@@ -89,12 +90,12 @@ export function Testimonials() {
 
 								{/* Content */}
 								<p className="text-gray-700 leading-relaxed mb-6 italic">
-									"{testimonial.content}"
+									&quot;{testimonial.content}&quot;
 								</p>
 
 								{/* Author */}
 								<div className="flex items-center">
-									<img
+									<Image
 										src={testimonial.image}
 										alt={testimonial.name}
 										className="w-12 h-12 rounded-full object-cover mr-4 group-hover:scale-110 transition-transform duration-300"
