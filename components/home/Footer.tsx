@@ -10,14 +10,14 @@ export function Footer() {
 	return (
 		<footer className="bg-gray-900 text-white">
 			<div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-				<div className="grid md:grid-cols-4 gap-8">
+				<div className="grid grid-cols-1 md:grid-cols-4 gap-8">
 					{/* Brand */}
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						whileInView={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.6 }}
 						viewport={{ once: true }}
-						className="col-span-2 md:col-span-1"
+						className="md:col-span-3"
 					>
 						<div className="flex items-center space-x-2 mb-6">
 							<div className="p-2 bg-gradient-to-r from-blue-500 to-green-500 rounded-lg">
@@ -49,6 +49,7 @@ export function Footer() {
 						whileInView={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.6, delay: 0.1 }}
 						viewport={{ once: true }}
+						className="md:col-span-1"
 					>
 						<h3 className="font-semibold text-lg mb-6">Product</h3>
 						<ul className="space-y-3">

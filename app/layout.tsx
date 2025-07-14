@@ -10,7 +10,7 @@ const defaultUrl = process.env.VERCEL_URL
 export const metadata: Metadata = {
 	// metadataBase: new URL("https://newsnudge.app"),
 	metadataBase: new URL(defaultUrl),
-	title: "NewsNudge - Transform Newsletters into Audio Briefings",
+	title: "NewsNudge",
 
 	description:
 		"Stay informed on-the-go with AI-powered audio briefings from your favorite newsletters. Perfect for busy professionals, commuters, and remote workers.",
