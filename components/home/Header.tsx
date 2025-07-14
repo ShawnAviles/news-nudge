@@ -103,12 +103,6 @@ export function Header() {
 							>
 								How It Works
 							</a>
-							<a
-								href="#testimonials"
-								className="text-gray-600 hover:text-blue-600 transition-colors"
-							>
-								Reviews
-							</a>
 							<button
 								className="btn btn-primary text-white w-full"
 								onClick={() => {
