@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import GoogleSignInButton from "./google-sign-in-button";
 
 export function LoginForm({
 	className,
@@ -89,9 +90,16 @@ export function LoginForm({
 								/>
 							</div>
 							{error && <p className="text-sm text-red-500">{error}</p>}
-							<Button type="submit" className="w-full" disabled={isLoading}>
+							<Button
+								type="submit"
+								className="w-full text-white"
+								disabled={isLoading}
+							>
 								{isLoading ? "Logging in..." : "Login"}
 							</Button>
+							<div className="border rounded" />
+							{/* Provide option to login with Google */}
+							<GoogleSignInButton />
 						</div>
 						<div className="mt-4 text-center text-sm">
 							Don&apos;t have an account?{" "}
