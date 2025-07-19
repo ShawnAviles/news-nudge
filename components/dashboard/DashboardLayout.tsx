@@ -23,7 +23,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         "lg:ml-64" // Always show sidebar on large screens
       )}>
         {/* Navbar */}
-        <Navbar onMenuClick={() => setSidebarOpen(true)} />
+        <div className="relative z-50">
+          <Navbar onMenuClick={() => setSidebarOpen(true)} />
+        </div>
         
         {/* Page Content */}
         <main className="p-6">

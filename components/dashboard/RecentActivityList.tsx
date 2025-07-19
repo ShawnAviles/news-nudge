@@ -4,6 +4,20 @@ import { Play, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+interface Transcript {
+  id: number;
+  title: string;
+  source: string;
+  duration: string;
+  audioUrl: string;
+  transcript: any[];
+}
+
+interface RecentActivityListProps {
+  onTranscriptSelect?: (transcript: Transcript) => void;
+  transcripts?: Transcript[];
+}
+
 const mockActivity = [
   {
     id: 1,
@@ -42,7 +56,16 @@ const mockActivity = [
   },
 ];
 
-export function RecentActivityList() {
+export function RecentActivityList({ onTranscriptSelect, transcripts }: RecentActivityListProps) {
+  const handlePlay = (item: any) => {
+    if (onTranscriptSelect && transcripts) {
+      const transcript = transcripts.find(t => t.id === item.id);
+      if (transcript) {
+        onTranscriptSelect(transcript);
+      }
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -72,7 +95,12 @@ export function RecentActivityList() {
                 </div>
               </div>
               
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8"
+                onClick={() => handlePlay(item)}
+              >
                 <Play className="h-4 w-4" />
               </Button>
             </div>
