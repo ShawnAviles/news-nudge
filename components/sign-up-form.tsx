@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import GoogleSignInButton from "./google-sign-in-button";
 
 export function SignUpForm({
@@ -72,7 +72,6 @@ export function SignUpForm({
 								<Input
 									id="email"
 									type="email"
-									placeholder="m@example.com"
 									required
 									value={email}
 									onChange={(e) => setEmail(e.target.value)}
@@ -107,7 +106,9 @@ export function SignUpForm({
 								{isLoading ? "Creating an account..." : "Sign up"}
 							</Button>
 							<div className="border rounded" />
-							<GoogleSignInButton />
+							<Suspense>
+								<GoogleSignInButton />
+							</Suspense>
 						</div>
 						<div className="mt-4 text-center text-sm">
 							Already have an account?{" "}

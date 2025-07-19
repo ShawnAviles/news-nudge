@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import GoogleSignInButton from "./google-sign-in-button";
 
 export function LoginForm({
@@ -65,7 +65,6 @@ export function LoginForm({
 								<Input
 									id="email"
 									type="email"
-									placeholder="m@example.com"
 									required
 									value={email}
 									onChange={(e) => setEmail(e.target.value)}
@@ -99,7 +98,9 @@ export function LoginForm({
 							</Button>
 							<div className="border rounded" />
 							{/* Provide option to login with Google */}
-							<GoogleSignInButton />
+							<Suspense>
+								<GoogleSignInButton />
+							</Suspense>
 						</div>
 						<div className="mt-4 text-center text-sm">
 							Don&apos;t have an account?{" "}
