@@ -4,23 +4,20 @@ import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const defaultUrl = process.env.VERCEL_URL
-	? `https://${process.env.VERCEL_URL}`
+const defaultUrl = process.env.NEXT_PUBLIC_VERCEL_URL
+	? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
 	: "http://localhost:3000";
 
 export const metadata: Metadata = {
 	// metadataBase: new URL("https://newsnudge.app"),
 	metadataBase: new URL(defaultUrl),
 	title: "NewsNudge",
-
 	description:
 		"Stay informed on-the-go with AI-powered audio briefings from your favorite newsletters. Perfect for busy professionals, commuters, and remote workers.",
-
 	keywords:
 		"newsletter, audio, briefing, AI, productivity, commute, professional",
-
 	openGraph: {
-		title: "NewsNudge - Transform Newsletters into Audio Briefings",
+		title: "NewsNudge",
 		description:
 			"Stay informed on-the-go with AI-powered audio briefings from your favorite newsletters.",
 		type: "website",

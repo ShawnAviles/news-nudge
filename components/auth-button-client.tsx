@@ -1,40 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useEffect } from "react";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { LogoutButton } from "./logout-button";
-import type { User } from "@supabase/supabase-js";
+import { ROUTE_TO_LOGIN, ROUTE_TO_SIGN_UP } from "@/lib/constants";
+import { useUser } from "@/hooks/use-user";
+import { useRouter } from "next/router";
 
 export function AuthButtonClient() {
-	const [user, setUser] = useState<User | null>(null);
-	const [loading, setLoading] = useState(true);
-	const supabase = createClientComponentClient();
+	const { loading, error, user } = useUser();
+	const router = useRouter();
 
 	useEffect(() => {
-		const getUser = async () => {
-			const { data } = await supabase.auth.getUser();
-			setUser(data.user);
-			setLoading(false);
-		};
-
-		getUser();
-
-		const { data: authListener } = supabase.auth.onAuthStateChange(
-			(event, session) => {
-				setUser(session?.user || null);
+		const checkUser = async () => {
+			if ((!loading && !user) || error) {
+				router.push(ROUTE_TO_LOGIN);
 			}
-		);
-
-		return () => {
-			authListener.subscription.unsubscribe();
 		};
-	}, [supabase.auth]);
-
-	if (loading) {
-		return <div className="h-5 w-12 animate-pulse bg-gray-200 rounded"></div>;
-	}
+		checkUser();
+	}, [router, error, user, loading]);
 
 	return user ? (
 		<div className="flex items-center gap-4">
@@ -44,10 +29,10 @@ export function AuthButtonClient() {
 	) : (
 		<div className="flex gap-2">
 			<Button asChild size="sm" variant={"outline"}>
-				<Link href="/auth/login">Sign in</Link>
+				<Link href={ROUTE_TO_LOGIN}>Sign in</Link>
 			</Button>
 			<Button asChild size="sm" variant={"default"}>
-				<Link href="/auth/sign-up">Sign up</Link>
+				<Link href={ROUTE_TO_SIGN_UP}>Sign up</Link>
 			</Button>
 		</div>
 	);

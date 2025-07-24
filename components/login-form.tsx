@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, Suspense } from "react";
 import GoogleSignInButton from "./google-sign-in-button";
+import { ROUTE_AFTER_LOGIN, ROUTE_TO_SIGN_UP } from "@/lib/constants";
 
 export function LoginForm({
 	className,
@@ -40,7 +41,7 @@ export function LoginForm({
 			});
 			if (error) throw error;
 			// Update this route to redirect to an authenticated route. The user already has an active session.
-			router.push("/protected");
+			router.push(ROUTE_AFTER_LOGIN);
 		} catch (error: unknown) {
 			setError(error instanceof Error ? error.message : "An error occurred");
 		} finally {
@@ -105,7 +106,7 @@ export function LoginForm({
 						<div className="mt-4 text-center text-sm">
 							Don&apos;t have an account?{" "}
 							<Link
-								href="/auth/sign-up"
+								href={ROUTE_TO_SIGN_UP}
 								className="underline underline-offset-4"
 							>
 								Sign up

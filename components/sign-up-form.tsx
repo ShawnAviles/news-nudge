@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, Suspense } from "react";
 import GoogleSignInButton from "./google-sign-in-button";
+import { ROUTE_TO_LOGIN } from "@/lib/constants";
 
 export function SignUpForm({
 	className,
@@ -112,7 +113,10 @@ export function SignUpForm({
 						</div>
 						<div className="mt-4 text-center text-sm">
 							Already have an account?{" "}
-							<Link href="/auth/login" className="underline underline-offset-4">
+							<Link
+								href={ROUTE_TO_LOGIN}
+								className="underline underline-offset-4"
+							>
 								Login
 							</Link>
 						</div>
