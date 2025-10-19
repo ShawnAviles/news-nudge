@@ -1,7 +1,11 @@
 import { updateSession } from "@/lib/supabase/middleware";
-import { type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  // TODO: Remove from production
+  if (process.env.NODE_ENV === "development") {
+    return NextResponse.next();
+  }
   return await updateSession(request);
 }
 
