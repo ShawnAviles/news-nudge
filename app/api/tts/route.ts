@@ -1,21 +1,34 @@
-import type { NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import prompts from "../../../lib/openai/prompts.json" assert { type: "json" };
 import OpenAI from "openai";
 import fs from "fs";
+import path from "path";
 
+// FIXME: Where should this live?
 const openai = new OpenAI();
 
 // https://nextjs.org/docs/app/api-reference/file-conventions/route#streaming
 
 export async function GET() {
-  return Response.json({ message: 'Text-to-Speech endpoint' });
+  d
+  return NextResponse.json({ message: 'Text-to-Speech endpoint' });
 }
 
 export async function POST(request: NextRequest) {
-  // TODO:
-  const { text } = await request.json();
-  console.log(text);
-  return Response.json({ message: "Text-to-Speech POST endpoint" });
+  try {
+    const { text } = await request.json();
+
+    const processedOutput = await convertTextToSpeechOpenAI(text);
+
+    if (!processedOutput.id) {
+      return NextResponse.json({ error: processedOutput }, { status: 400 });
+    }
+
+    return NextResponse.json(processedOutput, { status: 200 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
 
 // TODO: Add status check route '/status'
@@ -41,13 +54,17 @@ export async function POST(request: NextRequest) {
  * Main function to process newletter content into script then create audio file
  * @param {String} emailContent
  */
-const convertTextToSpeechOpenAI = async (emailContent: string) => {
+const convertTextToSpeechOpenAI = async (emailContent: string): Promise<{ id: string; message: string; filePath: string }> => {
   try {
 
     // generate script
     const openaiResponse = await generateScript(emailContent);
-    console.log(openaiResponse);
+    console.log(openaiResponse); // FIXME: remove after testing
     const { id, scriptContent } = openaiResponse;
+
+    if (!scriptContent) {
+      throw new Error("Error in generating script");
+    }
 
     // convert script to speech
     const audioResults = await convertScriptToSpeech(id, scriptContent);
@@ -101,52 +118,50 @@ const generateScript = async (originalNewsletterContent: string) => {
   };
 };
 
+// FIXME: We should not be writing files to the local filesystem like this, should be placed in an object store
 /**
  * Download response object from API call into file (json)
  * @param {object} data - json data from API response
  */
-const downloadOutputFile = (data) => {
-  if (!data.id) {
-    console.log("Error in downloading file");
-    throw new Error(`Download failed`);
-  }
+const downloadOutputFile = (data: any) => {
+  if (!data.id) throw new Error("Download failed");
+
   const id = data.id;
   const jsonData = JSON.stringify(data, null, 2);
 
-  const newAudioFilename = getCurrentDateWithTime() + "_" + id;
-  const filePath = `./src/output/script/${newAudioFilename}.json`;
+  // Save to a temp or storage folder at the project root
+  const dirPath = path.join(process.cwd(), "output");
+  if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
 
+  const filePath = path.join(dirPath, `${getCurrentDateWithTime()}_${id}.json`);
   fs.writeFileSync(filePath, jsonData);
-  console.log(`File downloaded at ${filePath}`);
 
-  return {
-    id,
-    message: "File downloaded successfully",
-    filePath,
-  };
+  console.log(`File downloaded at ${filePath}`);
+  return { id, message: "File downloaded successfully", filePath };
 };
 
 /**
  * Function to convert generated script into audio using OpenAI's tts-1 model
  * @param {String} scriptContent
  */
-const convertScriptToSpeech = async (id, scriptContent: string) => {
-	// OpenAI API call to generate audio from script
-	try {
-		const audio = await openai.audio.speech.create({
-			model: "tts-1",
-			voice: "sage",
-			input: scriptContent,
-			response_format: "wav",
-		});
-		console.log("Tried to convert script to speech:", audio.ok);
+const convertScriptToSpeech = async (id: string, scriptContent: string): Promise<{ id: string; message: string; filePath: string }> => {
+  // OpenAI API call to generate audio from script
+  try {
+    const audio = await openai.audio.speech.create({
+      model: "tts-1",
+      voice: "sage",
+      input: scriptContent,
+      response_format: "wav",
+    });
+    console.log("Tried to convert script to speech:", audio.ok);
 
-		// download audio file into output directory
-		const downloadResults = await downloadAudioFileFromBuffer(id, audio);
-		if (!downloadResults.filePath) {
-			throw new Error("Error in downloading file");
-		}
-		console.log("\nDownloaded File:", downloadResults.filePath);
+    // download audio file into output directory
+    const downloadResults = await downloadAudioFileFromBuffer(id, audio);
+    if (!downloadResults.filePath) {
+      throw new Error("Error in downloading file");
+    }
+    console.log("\nDownloaded File:", downloadResults.filePath);
+    return downloadResults;
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     console.error("Error in convertScriptToSpeech:", message);
@@ -160,14 +175,28 @@ const convertScriptToSpeech = async (id, scriptContent: string) => {
  * @param {Buffer} buff - audio buffer object
  * @returns object containing the file path
  */
-const downloadAudioFileFromBuffer = async (id, buff) => {
-  const newAudioFilename = getCurrentDateWithTime() + "_" + id;
-  const filePath = `./src/output/audio/${newAudioFilename}.wav`;
+export const downloadAudioFileFromBuffer = async (
+  id: string,
+  buff: Buffer | ArrayBuffer,
+) => {
+  if (!id || !buff) throw new Error("Invalid arguments for audio download");
 
-  console.log("\nOutput:", id, buff);
+  // Create a stable output directory (not inside /src)
+  const outputDir = path.join(process.cwd(), "output", "audio");
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
 
-  const buffer = Buffer.from(await buff.arrayBuffer());
-  await fs.promises.writeFile(filePath, buffer);
+  // Construct a timestamped filename
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const filename = `${timestamp}_${id}.wav`;
+  const filePath = path.join(outputDir, filename);
+
+  // Convert to Node.js buffer if necessary
+  const bufferData = buff instanceof Buffer ? buff : Buffer.from(await buff.arrayBuffer());
+  await fs.promises.writeFile(filePath, bufferData);
+
+  console.log(`✅ Audio file written to ${filePath}`);
 
   return {
     id,
