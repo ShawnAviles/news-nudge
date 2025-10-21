@@ -10,7 +10,6 @@ const openai = new OpenAI();
 // https://nextjs.org/docs/app/api-reference/file-conventions/route#streaming
 
 export async function GET() {
-  d
   return NextResponse.json({ message: 'Text-to-Speech endpoint' });
 }
 
