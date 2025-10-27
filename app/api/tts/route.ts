@@ -115,17 +115,19 @@ const generateScript = async (originalNewsletterContent: string) => {
     usage: completion.usage,
     scriptContent: completion.choices[0].message.content,
   };
-};
+}
 
 // FIXME: We should not be writing files to the local filesystem like this, should be placed in an object store
 /**
  * Download response object from API call into file (json)
  * @param {object} data - json data from API response
  */
-const downloadOutputFile = (data: any) => {
-  if (!data.id) throw new Error("Download failed");
+const downloadOutputFile = (data: unknown) => {
+  if (typeof data !== "object" || data === null || !("id" in data) || typeof (data as { id: unknown }).id !== "string") {
+    throw new Error("Download failed");
+  }
 
-  const id = data.id;
+  const { id } = data as { id: string };
   const jsonData = JSON.stringify(data, null, 2);
 
   // Save to a temp or storage folder at the project root
@@ -154,8 +156,11 @@ const convertScriptToSpeech = async (id: string, scriptContent: string): Promise
     });
     console.log("Tried to convert script to speech:", audio.ok);
 
+    // Extract audio buffer from Response
+    const audioBuffer = await audio.arrayBuffer();
+
     // download audio file into output directory
-    const downloadResults = await downloadAudioFileFromBuffer(id, audio);
+    const downloadResults = await downloadAudioFileFromBuffer(id, audioBuffer);
     if (!downloadResults.filePath) {
       throw new Error("Error in downloading file");
     }
@@ -174,9 +179,9 @@ const convertScriptToSpeech = async (id: string, scriptContent: string): Promise
  * @param {Buffer} buff - audio buffer object
  * @returns object containing the file path
  */
-export const downloadAudioFileFromBuffer = async (
+const downloadAudioFileFromBuffer = async (
   id: string,
-  buff: Buffer | ArrayBuffer,
+  buff: ArrayBuffer,
 ) => {
   if (!id || !buff) throw new Error("Invalid arguments for audio download");
 
@@ -191,9 +196,7 @@ export const downloadAudioFileFromBuffer = async (
   const filename = `${timestamp}_${id}.wav`;
   const filePath = path.join(outputDir, filename);
 
-  // Convert to Node.js buffer if necessary
-  const bufferData = buff instanceof Buffer ? buff : Buffer.from(await buff.arrayBuffer());
-  await fs.promises.writeFile(filePath, bufferData);
+  await fs.promises.writeFile(filePath, Buffer.from(buff));
 
   console.log(`✅ Audio file written to ${filePath}`);
 
@@ -208,7 +211,7 @@ export const downloadAudioFileFromBuffer = async (
  * Get current date string in format yyyy-mm-dd--hh-mm
  * @returns {String} current date
  */
-export const getCurrentDateWithTime = () => {
+const getCurrentDateWithTime = () => {
 	const dt = new Date();
 	const zonedDateParts = new Intl.DateTimeFormat("en-US", {
 		timeZone: "America/New_York",
@@ -220,7 +223,7 @@ export const getCurrentDateWithTime = () => {
 		hour12: false,
 	}).formatToParts(dt);
 
-	const dateData = {};
+	const dateData: Record<string, string> = {};
 	zonedDateParts.forEach(({ type, value }) => {
 		dateData[type] = value;
 	});
