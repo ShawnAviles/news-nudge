@@ -4,13 +4,11 @@ import OpenAI from "openai";
 import fs from "fs";
 import path from "path";
 
-// FIXME: Where should this live?
 const openai = new OpenAI();
 
-// https://nextjs.org/docs/app/api-reference/file-conventions/route#streaming
-
+// health check endpoint
 export async function GET() {
-  return NextResponse.json({ message: 'Text-to-Speech endpoint' });
+  return NextResponse.json({ status: 'ok' }, { status: 200 });
 }
 
 export async function POST(request: NextRequest) {
@@ -29,25 +27,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-
-// TODO: Add status check route '/status'
-
-
-/****************OLD CODE ******************************************/
-// POST /v2/tts
-// OpenAI API
-// export const convertTextToSpeechControllerV2 = async (req, res) => {
-//   const { text } = req.body;
-//   try {
-//     const processedOutput = await convertTextToSpeechOpenAI(text);
-//     if (!processedOutput.id) {
-//       return res.status(500).json({ error: processedOutput });
-//     }
-//     return res.json(processedOutput);
-//   } catch (error) {
-//     return res.status(500).json({ error: error.message });
-//   }
-// };
 
 /**
  * Main function to process newletter content into script then create audio file
