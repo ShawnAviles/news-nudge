@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import prompts from "../../../lib/openai/prompts.json" assert { type: "json" };
+import { getCurrentDateWithTime } from '../../../lib/utils';
 import OpenAI from "openai";
 import fs from "fs";
 import path from "path";
@@ -11,6 +12,10 @@ export async function GET() {
   return NextResponse.json({ status: 'ok' }, { status: 200 });
 }
 
+/** Text-to-Speech conversion endpoint 
+ * Expects JSON body with 'text' containing the newsletter content
+ * Generates a script using OpenAI and converts it to speech audio file
+*/
 export async function POST(request: NextRequest) {
   try {
     const { text } = await request.json();
@@ -37,7 +42,6 @@ const convertTextToSpeechOpenAI = async (emailContent: string): Promise<{ id: st
 
     // generate script
     const openaiResponse = await generateScript(emailContent);
-    console.log(openaiResponse); // FIXME: remove after testing
     const { id, scriptContent } = openaiResponse;
 
     if (!scriptContent) {
@@ -96,7 +100,6 @@ const generateScript = async (originalNewsletterContent: string) => {
   };
 }
 
-// FIXME: We should not be writing files to the local filesystem like this, should be placed in an object store
 /**
  * Download response object from API call into file (json)
  * @param {object} data - json data from API response
@@ -184,29 +187,4 @@ const downloadAudioFileFromBuffer = async (
     message: "File downloaded successfully",
     filePath,
   };
-};
-
-/**
- * Get current date string in format yyyy-mm-dd--hh-mm
- * @returns {String} current date
- */
-const getCurrentDateWithTime = () => {
-	const dt = new Date();
-	const zonedDateParts = new Intl.DateTimeFormat("en-US", {
-		timeZone: "America/New_York",
-		year: "numeric",
-		month: "2-digit",
-		day: "2-digit",
-		hour: "2-digit",
-		minute: "2-digit",
-		hour12: false,
-	}).formatToParts(dt);
-
-	const dateData: Record<string, string> = {};
-	zonedDateParts.forEach(({ type, value }) => {
-		dateData[type] = value;
-	});
-
-	const dateString = `${dateData.year}-${dateData.month}-${dateData.day}_${dateData.hour}:${dateData.minute}`;
-	return dateString;
 };
